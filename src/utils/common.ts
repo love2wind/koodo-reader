@@ -19,6 +19,7 @@ import { getCloudConfig } from "./file/common";
 import SyncService from "./storage/syncService";
 import localforage from "localforage";
 import { driveList } from "../constants/driveList";
+import { updateUserConfig } from "./request/user";
 declare var window: any;
 export const supportedFormats = [
   ".epub",
@@ -815,7 +816,9 @@ export const showDownloadProgress = (
   }, 500);
   return timer;
 };
-export const showTaskProgress = async () => {
+export const showTaskProgress = async (
+  handleSyncStateChange: (isSync: boolean) => void
+) => {
   let config = {};
   let timer: any;
   let service = ConfigService.getItem("defaultSyncOption");
@@ -844,13 +847,14 @@ export const showTaskProgress = async () => {
         if (stats.hasFailedTasks) {
           toast.error(
             i18n.t(
-              "Tasks failed after multiple retries, please check the network connection"
+              "Tasks failed after multiple retries, please check the network connection or reauthorize the data source in the settings"
             ),
             {
               id: "syncing",
             }
           );
           clearInterval(timer);
+          handleSyncStateChange(false);
           return;
         } else {
           toast.loading(
@@ -882,13 +886,14 @@ export const showTaskProgress = async () => {
         if (stats.hasFailedTasks) {
           toast.error(
             i18n.t(
-              "Tasks failed after multiple retries, please check the network connection"
+              "Tasks failed after multiple retries, please check the network connection or reauthorize the data source in the settings"
             ),
             {
               id: "syncing",
             }
           );
           clearInterval(timer);
+          handleSyncStateChange(false);
           return;
         } else {
           toast.loading(
@@ -939,4 +944,16 @@ export const clearAllData = async () => {
     ipcRenderer.invoke("clear-all-data", {});
   }
   await localforage.clear();
+};
+export const resetKoodoSync = async () => {
+  await updateUserConfig({
+    is_enable_koodo_sync: "no",
+    default_sync_option: ConfigService.getItem("defaultSyncOption"),
+  });
+  setTimeout(() => {
+    updateUserConfig({
+      is_enable_koodo_sync: "yes",
+      default_sync_option: ConfigService.getItem("defaultSyncOption"),
+    });
+  }, 1000);
 };

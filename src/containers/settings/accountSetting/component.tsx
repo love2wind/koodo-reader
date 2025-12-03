@@ -527,7 +527,7 @@ class AccountSetting extends React.Component<
                       if (getServerRegion() === "china") {
                         toast(
                           this.props.t(
-                            "If you have purchase the code directly from our website, please redeem with an account registered in global server region"
+                            "If you have purchased the code directly from our website, please redeem with an account registered in global server region"
                           ),
                           {
                             duration: 8000,
@@ -536,7 +536,7 @@ class AccountSetting extends React.Component<
                       } else {
                         toast(
                           this.props.t(
-                            "If you have purchase the code from Tabao store, please redeem with an account registered in Chinese server region"
+                            "If you have purchased the code from Tabao store, please redeem with an account registered in Chinese server region"
                           ),
                           {
                             duration: 8000,
@@ -563,46 +563,56 @@ class AccountSetting extends React.Component<
           </div>
         )}
         <div className="setting-dialog-new-title">
-          <Trans>Select server region</Trans>
-          <select
-            name=""
-            className="lang-setting-dropdown"
-            onChange={(event) => {
-              if (!event.target.value) {
-                return;
-              }
-              if (event.target.value === "china") {
-                toast(
-                  this.props.t(
-                    "Some login options and data sources are not available in your selected server region"
-                  )
-                );
-              }
-              ConfigService.setItem("serverRegion", event.target.value);
-              this.setState({
-                serverRegion: event.target.value,
-              });
-              resetReaderRequest();
-              resetUserRequest();
-              resetThirdpartyRequest();
-              toast.success(this.props.t("Setup successful"));
-            }}
-          >
-            {[
-              { value: "", label: "Please select" },
-              { value: "global", label: "Global" },
-              { value: "china", label: "China" },
-            ].map((item) => (
-              <option
-                value={item.value}
-                key={item.value}
-                className="lang-setting-option"
-                selected={item.value === getServerRegion()}
-              >
-                {this.props.t(item.label)}
-              </option>
-            ))}
-          </select>
+          <Trans>
+            {this.props.isAuthed ? "Server region" : "Select server region"}
+          </Trans>
+          {this.props.isAuthed ? (
+            <div className="lang-setting-option">
+              <Trans>
+                {getServerRegion() === "china" ? "China" : "Global"}
+              </Trans>
+            </div>
+          ) : (
+            <select
+              name=""
+              className="lang-setting-dropdown"
+              onChange={(event) => {
+                if (!event.target.value) {
+                  return;
+                }
+                if (event.target.value === "china") {
+                  toast(
+                    this.props.t(
+                      "Some login options and data sources are not available in your selected server region"
+                    )
+                  );
+                }
+                ConfigService.setItem("serverRegion", event.target.value);
+                this.setState({
+                  serverRegion: event.target.value,
+                });
+                resetReaderRequest();
+                resetUserRequest();
+                resetThirdpartyRequest();
+                toast.success(this.props.t("Setup successful"));
+              }}
+            >
+              {[
+                { value: "", label: "Please select" },
+                { value: "global", label: "Global" },
+                { value: "china", label: "China" },
+              ].map((item) => (
+                <option
+                  value={item.value}
+                  key={item.value}
+                  className="lang-setting-option"
+                  selected={item.value === getServerRegion()}
+                >
+                  {this.props.t(item.label)}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         {!this.props.isAuthed && (
           <div className="setting-dialog-new-title">
